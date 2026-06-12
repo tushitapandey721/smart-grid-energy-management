@@ -1,0 +1,150 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Grid Energy Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<section class="hero">
+    <div class="hero-content">
+        <h1>⚡ Smart Grid Energy Management</h1>
+        <p>Predict household electricity consumption using machine learning, PCA feature compression, and regression modeling.</p>
+        <a href="#predict" class="btn">Start Prediction</a>
+    </div>
+</section>
+
+<section class="info">
+    <div class="card">
+        <h2>What This System Does</h2>
+        <p>
+            This system predicts expected household power consumption based on electrical parameters,
+            time information, and previous usage patterns.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>How To Use</h2>
+        <p>
+            Enter the values in the form below. If you do not know exact values, use the sample values shown in the placeholders.
+            Then click Predict Consumption.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Output</h2>
+        <p>
+            The model returns predicted power consumption in kilowatts (kW).
+        </p>
+    </div>
+</section>
+
+<section class="form-section" id="predict">
+    <h2>Power Consumption Prediction Form</h2>
+
+    <form action="/predict" method="POST">
+
+        <div class="form-group">
+            <label>Global Reactive Power</label>
+            <input type="number" step="any" name="Global_reactive_power" placeholder="Example: 0.418" required>
+            <small>Reactive power used by the household.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Voltage</label>
+            <input type="number" step="any" name="Voltage" placeholder="Example: 234.84" required>
+            <small>Electric voltage level.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Global Intensity</label>
+            <input type="number" step="any" name="Global_intensity" placeholder="Example: 18.4" required>
+            <small>Current intensity in amperes.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Sub Metering 1</label>
+            <input type="number" step="any" name="Sub_metering_1" placeholder="Example: 0" required>
+            <small>Kitchen-related energy usage.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Sub Metering 2</label>
+            <input type="number" step="any" name="Sub_metering_2" placeholder="Example: 1" required>
+            <small>Laundry-related energy usage.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Sub Metering 3</label>
+            <input type="number" step="any" name="Sub_metering_3" placeholder="Example: 17" required>
+            <small>Water heater or AC-related usage.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Hour</label>
+            <input type="number" step="1" min="0" max="23" name="Hour" placeholder="0 to 23" required>
+            <small>Hour of the day.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Day</label>
+            <input type="number" step="1" min="1" max="31" name="Day" placeholder="1 to 31" required>
+            <small>Day of the month.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Month</label>
+            <input type="number" step="1" min="1" max="12" name="Month" placeholder="1 to 12" required>
+            <small>Month number.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Year</label>
+            <input type="number" step="1" name="Year" placeholder="Example: 2010" required>
+            <small>Year of reading.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Weekday</label>
+            <input type="number" step="1" min="0" max="6" name="Weekday" placeholder="0=Mon, 6=Sun" required>
+            <small>Monday is 0, Sunday is 6.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Weekend</label>
+            <input type="number" step="1" min="0" max="1" name="Weekend" placeholder="0 or 1" required>
+            <small>0 = weekday, 1 = weekend.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Peak Hour</label>
+            <input type="number" step="1" min="0" max="1" name="Peak_Hour" placeholder="0 or 1" required>
+            <small>1 if time is between 6 PM and 10 PM.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Previous Power</label>
+            <input type="number" step="any" name="Previous_Power" placeholder="Example: 4.216" required>
+            <small>Power consumption from previous minute.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Rolling Mean 24</label>
+            <input type="number" step="any" name="Rolling_Mean_24" placeholder="Example: 1.091" required>
+            <small>Average power over previous 24 hours.</small>
+        </div>
+
+        <button type="submit">Predict Consumption</button>
+    </form>
+
+    {% if prediction_text %}
+    <div class="result-box">
+        <h3>{{ prediction_text }}</h3>
+        <p>This is the estimated household electricity demand based on the values entered.</p>
+    </div>
+    {% endif %}
+</section>
+
+</body>
+</html>
