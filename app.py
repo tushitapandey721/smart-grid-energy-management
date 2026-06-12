@@ -5,10 +5,14 @@ import joblib
 app = Flask(__name__)
 
 # Load files
-model = joblib.load("model.pkl")
-imputer = joblib.load("imputer.pkl")
-scaler = joblib.load("scaler.pkl")
-pca = joblib.load("pca.pkl")
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model = joblib.load(os.path.join(BASE_DIR, "model.pkl"))
+imputer = joblib.load(os.path.join(BASE_DIR, "imputer.pkl"))
+scaler = joblib.load(os.path.join(BASE_DIR, "scaler.pkl"))
+pca = joblib.load(os.path.join(BASE_DIR, "pca.pkl"))
 
 
 @app.route('/')
