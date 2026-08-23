@@ -1,6 +1,7 @@
 import os
 import joblib
 import numpy as np
+import pandas as pd
 from datetime import datetime
 
 # Load serialized model artifacts with fallback resolution
@@ -17,10 +18,11 @@ imputer = _load_artifact("imputer.pkl")
 scaler = _load_artifact("scaler.pkl")
 pca = _load_artifact("pca.pkl")
 
-# Built-in quick preset profiles for real-world scenarios
+# Built-in quick preset profiles for real-world scenarios (clean professional labels, no emojis)
 PRESETS = {
     "eco_night": {
-        "name": "🌙 Eco Night Baseline",
+        "name": "Eco Night Baseline",
+        "icon": "fa-moon",
         "description": "Minimal late-night power draw with appliances idle and baseline standby load.",
         "data": {
             "Global_reactive_power": 0.082,
@@ -41,7 +43,8 @@ PRESETS = {
         }
     },
     "morning_rush": {
-        "name": "🍳 Morning Breakfast Peak",
+        "name": "Morning Breakfast Peak",
+        "icon": "fa-utensils",
         "description": "Active kitchen appliances (kettle, toaster, microwave) and high morning activity.",
         "data": {
             "Global_reactive_power": 0.234,
@@ -62,7 +65,8 @@ PRESETS = {
         }
     },
     "laundry_cleaning": {
-        "name": "🧺 Weekend Laundry & Chores",
+        "name": "Weekend Laundry & Chores",
+        "icon": "fa-shirt",
         "description": "High laundry washing machine, dryer, and general household appliance load.",
         "data": {
             "Global_reactive_power": 0.310,
@@ -83,7 +87,8 @@ PRESETS = {
         }
     },
     "heavy_hvac_peak": {
-        "name": "❄️ Summer Evening Peak & AC",
+        "name": "Summer Evening Peak & HVAC",
+        "icon": "fa-temperature-arrow-up",
         "description": "Heavy water heating and AC load during high grid tariff peak evening hours.",
         "data": {
             "Global_reactive_power": 0.468,
@@ -104,7 +109,8 @@ PRESETS = {
         }
     },
     "standard_balanced": {
-        "name": "⚡ Balanced Household",
+        "name": "Balanced Active Household",
+        "icon": "fa-house",
         "description": "Nominal everyday power usage across normal household entertainment and lighting.",
         "data": {
             "Global_reactive_power": 0.210,
@@ -185,7 +191,6 @@ def predict_consumption(raw_inputs: dict) -> dict:
         except (ValueError, TypeError):
             vals.append(0.0)
             
-    import pandas as pd
     df_features = pd.DataFrame([vals], columns=feature_order)
     
     # ML Pipeline transformation
@@ -197,7 +202,7 @@ def predict_consumption(raw_inputs: dict) -> dict:
     predicted_kw = max(0.0, float(pred_raw.ravel()[0]))
     
     # Secondary Energy Metrics
-    # Electricity cost estimates ($0.16/kWh global avg, ₹8.0/kWh Indian grid avg)
+    # Electricity cost estimates ($0.16/kWh global avg, INR 8.0/kWh Indian grid avg)
     hourly_cost_usd = predicted_kw * 0.16
     hourly_cost_inr = predicted_kw * 8.00
     monthly_estimate_kwh = predicted_kw * 24 * 30.5
@@ -207,25 +212,25 @@ def predict_consumption(raw_inputs: dict) -> dict:
     # Carbon footprint (approx 0.475 kg CO2 per kWh)
     carbon_kg_hr = predicted_kw * 0.475
     
-    # Usage tier & alert styling
+    # Usage tier & alert styling (clean neutral palette friendly)
     if predicted_kw < 1.2:
         tier = "Eco Low"
         tier_class = "tier-low"
-        tier_color = "#10B981" # Emerald Green
+        tier_color = "#059669" # Forest / Emerald Green
         tier_icon = "fa-leaf"
-        tier_advice = "Electricity consumption is minimal and energy efficient. Great job maintaining an eco-friendly footprint!"
+        tier_advice = "Electricity consumption is minimal and energy efficient. The active demand profile demonstrates high energy conservation."
     elif predicted_kw < 3.2:
-        tier = "Moderate / Nominal"
+        tier = "Nominal Usage"
         tier_class = "tier-med"
-        tier_color = "#F59E0B" # Amber
+        tier_color = "#d97706" # Warm Amber
         tier_icon = "fa-bolt"
-        tier_advice = "Usage is within normal household parameters. Regular daytime active appliance profile."
+        tier_advice = "Usage is within normal residential parameters. Baseline entertainment, lighting, and moderate appliance activity."
     else:
-        tier = "High / Peak Alert"
+        tier = "High Peak Alert"
         tier_class = "tier-high"
-        tier_color = "#EF4444" # Crimson Red
-        tier_icon = "fa-fire-flame-curved"
-        tier_advice = "Heavy electrical load detected! Consider load-shifting heavy appliances (laundry/water heating) away from peak tariff hours."
+        tier_color = "#dc2626" # Crimson
+        tier_icon = "fa-triangle-exclamation"
+        tier_advice = "Elevated electrical draw detected. Consider rescheduling high-demand appliances (laundry and water heating) away from peak tariff windows."
         
     # Sub-metering decomposition in Watt-Hours (approx relative shares)
     sub1 = float(raw_inputs.get("Sub_metering_1", 0.0))
@@ -250,7 +255,6 @@ def predict_consumption(raw_inputs: dict) -> dict:
     hour_val = int(raw_inputs.get("Hour", 12))
     simulated_24h = []
     for h in range(24):
-        # Time multiplier factor simulating daily load curves
         if 0 <= h <= 5:
             multiplier = 0.35 + 0.05 * np.sin(h)
         elif 6 <= h <= 9:

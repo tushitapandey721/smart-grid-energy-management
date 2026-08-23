@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoltIQ Smart Grid — Demand Predictor Workspace</title>
+    <meta name="description" content="Interactive AI-powered electricity demand predictor workspace with sub-metering analytics and 24-hour simulation curves.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Neutral Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="neutral-theme">
+
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">VOLTIQ <span class="brand-accent">SMART GRID</span></span>
+                    <span class="brand-subtitle">Demand Predictor Workspace</span>
+                </div>
+            </a>
+            
+            <div class="nav-links">
+                <a href="/" class="nav-link"><i class="fa-solid fa-arrow-left"></i> System Overview</a>
+                <a href="/app" class="nav-link active-link">Workspace</a>
+                <div class="nav-status-strip">
+                    <span class="status-pill-neutral">
+                        <span class="pulse-dot-emerald"></span> System Online
+                    </span>
+                    <span class="badge-tag-neutral">PCA-12 Fitted</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Workspace Main Layout -->
+    <main class="main-layout">
+
+        <!-- Top Scenario Presets Bar -->
+        <section class="presets-section">
+            <div class="section-header-mini">
+                <span><i class="fa-solid fa-sliders"></i> Scenario Profiles</span>
+                <small>Select a pre-configured profile to test standard electrical environments</small>
+            </div>
+            <div class="preset-pills-row" id="presetPills">
+                {% for key, preset in presets.items() %}
+                <button type="button" class="preset-btn {% if key == 'standard_balanced' %}active{% endif %}" data-preset="{{ key }}">
+                    <span class="preset-icon"><i class="fa-solid {{ preset.icon }}"></i></span>
+                    <div class="preset-info">
+                        <strong>{{ preset.name }}</strong>
+                        <small>{{ preset.description }}</small>
+                    </div>
+                </button>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Two-Column Workspace Grid -->
+        <div class="workspace-grid">
+            
+            <!-- Left Column: Input Telemetry Panel -->
+            <section class="panel-card form-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fa-solid fa-input-numeric"></i>
+                        <span>Grid & Telemetry Inputs</span>
+                    </div>
+                    <button type="button" id="btnUseCurrentTime" class="btn-neutral-sm" title="Sync with current local time">
+                        <i class="fa-solid fa-arrows-rotate"></i> Sync Current Time
+                    </button>
+                </div>
+
+                <form id="predictionForm" action="/predict" method="POST">
+                    
+                    <!-- Group 1: Electrical Sensors -->
+                    <div class="input-group-box">
+                        <div class="group-title">
+                            <i class="fa-solid fa-plug"></i> 1. Electrical Telemetry
+                        </div>
+                        <div class="form-grid-3">
+                            <div class="field-item">
+                                <label for="Voltage">
+                                    <span>Supply Voltage</span>
+                                    <span class="unit-tag">V</span>
+                                </label>
+                                <div class="input-with-icon">
+                                    <i class="fa-solid fa-wave-square"></i>
+                                    <input type="number" step="0.01" id="Voltage" name="Voltage" value="{{ form_data.get('Voltage', 234.84) }}" required>
+                                </div>
+                                <small class="field-hint">Nominal 220–245 V</small>
+                            </div>
+
+                            <div class="field-item">
+                                <label for="Global_intensity">
+                                    <span>Current Intensity</span>
+                                    <span class="unit-tag">A</span>
+                                </label>
+                                <div class="input-with-icon">
+                                    <i class="fa-solid fa-gauge"></i>
+                                    <input type="number" step="0.1" id="Global_intensity" name="Global_intensity" value="{{ form_data.get('Global_intensity', 18.4) }}" required>
+                                </div>
+                                <small class="field-hint">Aggregate current draw</small>
+                            </div>
+
+                            <div class="field-item">
+                                <label for="Global_reactive_power">
+                                    <span>Reactive Power</span>
+                                    <span class="unit-tag">kVAR</span>
+                                </label>
+                                <div class="input-with-icon">
+                                    <i class="fa-solid fa-atom"></i>
+                                    <input type="number" step="0.001" id="Global_reactive_power" name="Global_reactive_power" value="{{ form_data.get('Global_reactive_power', 0.418) }}" required>
+                                </div>
+                                <small class="field-hint">Standby / inductive power</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Group 2: Sub-Metering Appliance Loads -->
+                    <div class="input-group-box">
+                        <div class="group-title">
+                            <i class="fa-solid fa-cubes-stacked"></i> 2. Sub-Metering Appliance Loads (Wh)
+                        </div>
+                        <div class="form-grid-3">
+                            <div class="field-item">
+                                <label for="Sub_metering_1">
+                                    <span>Sub 1: Kitchen</span>
+                                    <span class="unit-tag">Wh</span>
+                                </label>
+                                <div class="input-with-icon">
+                                    <i class="fa-solid fa-utensils"></i>
+                                    <input type="number" step="0.1" id="Sub_metering_1" name="Sub_metering_1" value="{{ form_data.get('Sub_metering_1', 0.0) }}" required>
+                                </div>
+                                <small class="field-hint">Microwave, dishwasher</small>
+                            </div>
+
+                            <div class="field-item">
+                                <label for="Sub_metering_2">
+                                    <span>Sub 2: Laundry</span>
+                                    <span class="unit-tag">Wh</span>
+                                </label>
+                                <div class="input-with-icon">
+                                    <i class="fa-solid fa-shirt"></i>
+                                    <input type="number" step="0.1" id="Sub_metering_2" name="Sub_metering_2" value="{{ form_data.get('Sub_metering_2', 1.0) }}" required>
+                                </div>
+                                <small class="field-hint">Washer, dryer</small>
+                            </div>
+
+                            <div class="field-item">
+                                <label for="Sub_metering_3">
+                                    <span>Sub 3: HVAC / Boiler</span>
+                                    <span class="unit-tag">Wh</span>
+                                </label>
+                                <div class="input-with-icon">
+                                    <i class="fa-solid fa-temperature-arrow-up"></i>
+                                    <input type="number" step="0.1" id="Sub_metering_3" name="Sub_metering_3" value="{{ form_data.get('Sub_metering_3', 17.0) }}" required>
+                                </div>
+                                <small class="field-hint">Air conditioner, water heater</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Group 3: Smart Temporal Context -->
+                    <div class="input-group-box">
+                        <div class="group-title">
+                            <i class="fa-regular fa-clock"></i> 3. Smart Date & Time Context
+                        </div>
+                        
+                        <div class="datetime-smart-row">
+                            <div class="field-item full-width">
+                                <label for="custom_datetime">
+                                    <span>Select Timestamp (Auto-calculates Hour, Day, Month, Peak Period & Weekend)</span>
+                                </label>
+                                <div class="input-with-icon">
+                                    <i class="fa-regular fa-calendar"></i>
+                                    <input type="datetime-local" id="custom_datetime" name="custom_datetime">
+                                </div>
+                            </div>
+                        </div>
+
+                        <details class="advanced-time-details">
+                            <summary><i class="fa-solid fa-sliders"></i> Override Derived Temporal Values</summary>
+                            <div class="form-grid-4">
+                                <div class="field-item">
+                                    <label for="Hour">Hour (0-23)</label>
+                                    <input type="number" id="Hour" name="Hour" min="0" max="23" value="{{ form_data.get('Hour', 18) }}" required>
+                                </div>
+                                <div class="field-item">
+                                    <label for="Day">Day (1-31)</label>
+                                    <input type="number" id="Day" name="Day" min="1" max="31" value="{{ form_data.get('Day', 16) }}" required>
+                                </div>
+                                <div class="field-item">
+                                    <label for="Month">Month (1-12)</label>
+                                    <input type="number" id="Month" name="Month" min="1" max="12" value="{{ form_data.get('Month', 12) }}" required>
+                                </div>
+                                <div class="field-item">
+                                    <label for="Year">Year</label>
+                                    <input type="number" id="Year" name="Year" value="{{ form_data.get('Year', 2024) }}" required>
+                                </div>
+                                <div class="field-item">
+                                    <label for="Weekday">Weekday (0=Mon)</label>
+                                    <input type="number" id="Weekday" name="Weekday" min="0" max="6" value="{{ form_data.get('Weekday', 4) }}" required>
+                                </div>
+                                <div class="field-item">
+                                    <label for="Weekend">Weekend?</label>
+                                    <select id="Weekend" name="Weekend">
+                                        <option value="0" {% if form_data.get('Weekend') == 0 %}selected{% endif %}>No (Weekday)</option>
+                                        <option value="1" {% if form_data.get('Weekend') == 1 %}selected{% endif %}>Yes (Weekend)</option>
+                                    </select>
+                                </div>
+                                <div class="field-item">
+                                    <label for="Peak_Hour">Peak Window?</label>
+                                    <select id="Peak_Hour" name="Peak_Hour">
+                                        <option value="0" {% if form_data.get('Peak_Hour') == 0 %}selected{% endif %}>No (Off-Peak)</option>
+                                        <option value="1" {% if form_data.get('Peak_Hour') == 1 %}selected{% endif %}>Yes (6-10 PM Peak)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- Group 4: Historical Baseline -->
+                    <div class="input-group-box">
+                        <div class="group-title">
+                            <i class="fa-solid fa-chart-area"></i> 4. Historical Consumption Baseline
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="field-item">
+                                <label for="Previous_Power">
+                                    <span>Lag-1 Power</span>
+                                    <span class="unit-tag">kW</span>
+                                </label>
+                                <div class="input-with-icon">
+                                    <i class="fa-solid fa-backward"></i>
+                                    <input type="number" step="0.001" id="Previous_Power" name="Previous_Power" value="{{ form_data.get('Previous_Power', 4.216) }}" required>
+                                </div>
+                                <small class="field-hint">Previous minute reading</small>
+                            </div>
+
+                            <div class="field-item">
+                                <label for="Rolling_Mean_24">
+                                    <span>24-Hour Rolling Mean</span>
+                                    <span class="unit-tag">kW</span>
+                                </label>
+                                <div class="input-with-icon">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                    <input type="number" step="0.001" id="Rolling_Mean_24" name="Rolling_Mean_24" value="{{ form_data.get('Rolling_Mean_24', 1.091) }}" required>
+                                </div>
+                                <small class="field-hint">Moving average load</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Primary Action Button -->
+                    <button type="submit" id="btnSubmit" class="btn-primary-action">
+                        <span class="btn-content">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span class="btn-text">Compute Demand Forecast</span>
+                        </span>
+                        <div class="btn-spinner" style="display:none;">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Processing Model Inference...
+                        </div>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right Column: Analytics & Forecast Results -->
+            <section class="panel-card results-panel" id="resultsSection">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Model Output & Diagnostics</span>
+                    </div>
+                    <span id="tierBadge" class="tier-pill {% if result %}{{ result.tier_class }}{% else %}tier-med{% endif %}">
+                        <i class="fa-solid {% if result %}{{ result.tier_icon }}{% else %}fa-bolt{% endif %}"></i>
+                        <span id="tierLabel">{% if result %}{{ result.tier }}{% else %}Ready for Analysis{% endif %}</span>
+                    </span>
+                </div>
+
+                <!-- Hero Gauge Card -->
+                <div class="gauge-hero-card">
+                    <div class="gauge-visual-wrap">
+                        <canvas id="gaugeCanvas" width="260" height="150"></canvas>
+                        <div class="gauge-number-center">
+                            <span id="predValue" class="gauge-kw-val">{% if result %}{{ result.predicted_kw }}{% else %}1.921{% endif %}</span>
+                            <span class="gauge-kw-unit">kW</span>
+                        </div>
+                    </div>
+
+                    <div class="gauge-meta-side">
+                        <span class="meta-headline">Estimated Active Power Draw</span>
+                        <p id="tierAdviceText" class="tier-advice-p">
+                            {% if result %}
+                                {{ result.tier_advice }}
+                            {% else %}
+                                Run a prediction or choose a scenario preset to compute real-time active demand, cost projections, and appliance breakdowns.
+                            {% endif %}
+                        </p>
+                        <div class="model-confidence-bar">
+                            <div class="conf-labels">
+                                <span>PCA Compression</span>
+                                <span>15 Sensors &rarr; 12 Components</span>
+                            </div>
+                            <div class="conf-track">
+                                <div class="conf-fill" style="width: 85%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 Key Impact Metric Tiles -->
+                <div class="metric-tiles-grid">
+                    <div class="metric-tile">
+                        <div class="tile-icon icon-blue">
+                            <i class="fa-solid fa-dollar-sign"></i>
+                        </div>
+                        <div class="tile-data">
+                            <span class="tile-label">Hourly Cost Estimate</span>
+                            <div class="tile-val-group">
+                                <span id="valCostUsd" class="tile-main-val">{% if result %}${{ "%.3f"|format(result.hourly_cost_usd) }}{% else %}$0.307{% endif %}</span>
+                                <span id="valCostInr" class="tile-sub-val">{% if result %}(INR {{ result.hourly_cost_inr }}/hr){% else %}(INR 15.37/hr){% endif %}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-tile">
+                        <div class="tile-icon icon-emerald">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <div class="tile-data">
+                            <span class="tile-label">Monthly Projection</span>
+                            <div class="tile-val-group">
+                                <span id="valMonthKwh" class="tile-main-val">{% if result %}{{ result.monthly_estimate_kwh }} kWh{% else %}1406.4 kWh{% endif %}</span>
+                                <span id="valMonthCost" class="tile-sub-val">{% if result %}(~${{ result.monthly_cost_usd }} / mo){% else %}(~$225.02 / mo){% endif %}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-tile">
+                        <div class="tile-icon icon-leaf">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <div class="tile-data">
+                            <span class="tile-label">Carbon Emissions</span>
+                            <div class="tile-val-group">
+                                <span id="valCarbon" class="tile-main-val">{% if result %}{{ result.carbon_kg_hr }} kg{% else %}0.913 kg{% endif %}</span>
+                                <span class="tile-sub-val">CO<sub>2</sub> emitted / hour</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-tile">
+                        <div class="tile-icon icon-amber">
+                            <i class="fa-solid fa-network-wired"></i>
+                        </div>
+                        <div class="tile-data">
+                            <span class="tile-label">Grid Load Status</span>
+                            <div class="tile-val-group">
+                                <span id="valPeakStatus" class="tile-main-val">
+                                    {% if form_data.get('Peak_Hour') == 1 %}PEAK TARIFF{% else %}OFF-PEAK{% endif %}
+                                </span>
+                                <span class="tile-sub-val">Dynamic Grid Tier</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Charts Section -->
+                <div class="charts-split-grid">
+                    <!-- Appliance Sub-metering Pie/Donut -->
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <i class="fa-solid fa-chart-pie"></i> Appliance Load Distribution
+                        </div>
+                        <div class="chart-container donut-wrap">
+                            <canvas id="applianceDonutChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 24-Hour Simulated Demand Curve -->
+                    <div class="chart-card">
+                        <div class="chart-card-header">
+                            <i class="fa-solid fa-chart-line"></i> Simulated 24-Hour Load Profile
+                        </div>
+                        <div class="chart-container line-wrap">
+                            <canvas id="dailyLoadLineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendation Box -->
+                <div class="recommendation-box" id="recommendationBox">
+                    <div class="rec-icon">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <div class="rec-content">
+                        <strong>Smart Energy Optimization Advisory:</strong>
+                        <p id="recText">
+                            {% if result and result.predicted_kw > 3.0 %}
+                                Water heating & heavy HVAC account for major load during peak hours. Pre-heating water before 6 PM can lower overall grid stress and cut peak electricity bills by up to 22%.
+                            {% elif result and result.predicted_kw < 1.0 %}
+                                Your baseline idle consumption is exceptional. Ensure phantom standby devices remain isolated during nighttime hours.
+                            {% else %}
+                                Consider load-shifting high current laundry and dishwasher cycles to off-peak slots to maximize smart meter efficiency.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <span><strong>VoltIQ Smart Grid Energy Management</strong></span>
+                <span class="footer-sep">&bull;</span>
+                <span>Dataset: UCI Individual Household Electric Power Consumption</span>
+            </div>
+            <div class="footer-right">
+                <a href="/" class="footer-link">Overview</a>
+                <a href="/app" class="footer-link">Workspace</a>
+                <a href="https://github.com/tushitapandey721/smart-grid-energy-management" target="_blank" class="footer-link"><i class="fa-brands fa-github"></i> Repository</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Pass initial server data to JS safely -->
+    <script>
+        window.INITIAL_RESULT = {{ result|tojson if result else 'null' }};
+        window.PRESETS_DATA = {{ presets|tojson }};
+    </script>
+    
+    <!-- Main Client Script -->
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

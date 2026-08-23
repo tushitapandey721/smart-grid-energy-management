@@ -6,17 +6,22 @@ import energy_engine
 app = Flask(__name__)
 
 @app.route("/", methods=["GET"])
-def index():
-    # Initial default preset and dynamic time
+def landing():
+    """Renders the comprehensive informational landing page about system architecture & working."""
+    return render_template("landing.html")
+
+@app.route("/app", methods=["GET"])
+@app.route("/predict-view", methods=["GET"])
+def app_view():
+    """Renders the actual interactive demand predictor workspace."""
     default_preset = energy_engine.PRESETS["standard_balanced"]["data"]
     time_info = energy_engine.derive_time_features()
     
-    # Merge current time features into default data
     initial_data = dict(default_preset)
     initial_data.update(time_info)
     
     return render_template(
-        "index.html",
+        "predict.html",
         presets=energy_engine.PRESETS,
         form_data=initial_data,
         result=None
@@ -26,7 +31,6 @@ def index():
 def predict():
     form_data = request.form.to_dict()
     
-    # Auto derive time if user used datetime-local input
     custom_dt = form_data.get("custom_datetime")
     if custom_dt:
         try:
@@ -39,7 +43,7 @@ def predict():
     result = energy_engine.predict_consumption(form_data)
     
     return render_template(
-        "index.html",
+        "predict.html",
         presets=energy_engine.PRESETS,
         form_data=form_data,
         result=result

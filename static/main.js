@@ -1,17 +1,15 @@
 /**
- * Smart Grid Energy Management - Client Controller
- * Handles live telemetry, gauge rendering, Chart.js graphs, AJAX prediction & animations.
+ * VoltIQ Smart Grid - Client Controller (Neutral Theme)
+ * Handles telemetry syncing, animated radial gauge, Chart.js graphs, AJAX prediction & animations.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- State & Chart Instances ---
     let donutChartInstance = null;
     let lineChartInstance = null;
-    let targetKw = 1.85;
+    let targetKw = 1.92;
     let currentKw = 0;
 
-    // --- DOM Elements ---
-    const liveClockEl = document.getElementById('liveClock');
+    // DOM Elements
     const btnUseCurrentTime = document.getElementById('btnUseCurrentTime');
     const customDatetimeInput = document.getElementById('custom_datetime');
     const predictionForm = document.getElementById('predictionForm');
@@ -23,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tierLabel = document.getElementById('tierLabel');
     const tierAdviceText = document.getElementById('tierAdviceText');
 
-    // Financial & Metric Readouts
+    // Metrics Readouts
     const valCostUsd = document.getElementById('valCostUsd');
     const valCostInr = document.getElementById('valCostInr');
     const valMonthKwh = document.getElementById('valMonthKwh');
@@ -32,16 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const valPeakStatus = document.getElementById('valPeakStatus');
     const recText = document.getElementById('recText');
 
-    // 1. Live Grid Clock
-    function updateLiveClock() {
-        const now = new Date();
-        const timeStr = now.toTimeString().split(' ')[0];
-        if (liveClockEl) liveClockEl.textContent = timeStr;
-    }
-    setInterval(updateLiveClock, 1000);
-    updateLiveClock();
-
-    // 2. Synchronize Local Datetime & Auto-derive features
+    // 1. Synchronize Datetime
     function setFormToDatetime(dateObj) {
         const localISO = new Date(dateObj.getTime() - dateObj.getTimezoneOffset() * 60000)
             .toISOString()
@@ -52,13 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const day = dateObj.getDate();
         const month = dateObj.getMonth() + 1;
         const year = dateObj.getFullYear();
-        const jsWeekday = dateObj.getDay(); // 0 is Sun, 1 is Mon...
-        // Convert to python weekday (0 is Mon, 6 is Sun)
+        const jsWeekday = dateObj.getDay();
         const pyWeekday = (jsWeekday + 6) % 7;
         const isWeekend = (pyWeekday === 5 || pyWeekday === 6) ? 1 : 0;
         const isPeak = (hour >= 18 && hour <= 22) ? 1 : 0;
 
-        // Set inputs
         const setVal = (id, v) => {
             const el = document.getElementById(id);
             if (el) el.value = v;
@@ -77,8 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Default datetime on load
-    setFormToDatetime(new Date());
+    if (customDatetimeInput) {
+        setFormToDatetime(new Date());
+    }
 
     if (btnUseCurrentTime) {
         btnUseCurrentTime.addEventListener('click', () => {
@@ -95,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Scenario Presets Handler
+    // 2. Scenario Presets
     presetPills.forEach(btn => {
         btn.addEventListener('click', () => {
             presetPills.forEach(b => b.classList.remove('active'));
@@ -108,14 +96,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     const inputEl = document.getElementById(k);
                     if (inputEl) inputEl.value = pData[k];
                 });
-                
-                // Trigger live inference
                 triggerPrediction();
             }
         });
     });
 
-    // 4. Canvas-based Animated Radial Gauge
+    // 3. Canvas-based Radial Gauge
     function drawGauge(val) {
         if (!gaugeCanvas) return;
         const ctx = gaugeCanvas.getContext('2d');
@@ -127,26 +113,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ctx.clearRect(0, 0, width, height);
 
-        // Background Arc (Gray track)
+        // Background Track
         ctx.beginPath();
         ctx.arc(cx, cy, radius, Math.PI, 2 * Math.PI, false);
         ctx.lineWidth = 14;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.strokeStyle = '#e2e8f0';
         ctx.lineCap = 'round';
         ctx.stroke();
 
-        // Calculate progress angle (0 to 6 kW scale)
         const maxKw = 6.0;
         const clampedVal = Math.min(Math.max(val, 0), maxKw);
         const ratio = clampedVal / maxKw;
         const endAngle = Math.PI + (ratio * Math.PI);
 
-        // Active Arc Gradient
+        // Active Gradient
         const gradient = ctx.createLinearGradient(20, cy, width - 20, cy);
-        gradient.addColorStop(0, '#10b981');   // Eco Green
-        gradient.addColorStop(0.5, '#00f2fe'); // Electric Cyan
-        gradient.addColorStop(0.8, '#f59e0b'); // Warning Amber
-        gradient.addColorStop(1, '#ef4444');   // Peak Red
+        gradient.addColorStop(0, '#059669');   // Emerald
+        gradient.addColorStop(0.5, '#2563eb'); // Blue
+        gradient.addColorStop(0.8, '#d97706'); // Amber
+        gradient.addColorStop(1, '#dc2626');   // Crimson
 
         if (ratio > 0.01) {
             ctx.beginPath();
@@ -154,10 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.lineWidth = 14;
             ctx.strokeStyle = gradient;
             ctx.lineCap = 'round';
-            ctx.shadowColor = ratio > 0.6 ? 'rgba(239, 68, 68, 0.6)' : 'rgba(0, 242, 254, 0.5)';
-            ctx.shadowBlur = 15;
             ctx.stroke();
-            ctx.shadowBlur = 0; // Reset shadow
         }
 
         // Ticks
@@ -174,12 +156,11 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
             ctx.lineWidth = 2;
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            ctx.strokeStyle = '#cbd5e1';
             ctx.stroke();
         }
     }
 
-    // Number count-up animation loop
     function animateGaugeTo(val) {
         targetKw = val;
         const step = () => {
@@ -198,13 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(step);
     }
 
-    // 5. Chart.js Graphs Initialization & Updates
+    // 4. Chart.js Graphs Initialization
     function initCharts(breakdown, simulated24h) {
-        // A. Donut Chart (Sub-metering Distribution)
         const donutCtx = document.getElementById('applianceDonutChart');
         if (donutCtx) {
             const donutData = {
-                labels: ['Kitchen (Sub 1)', 'Laundry (Sub 2)', 'HVAC / Water Heat (Sub 3)', 'Baseline Load'],
+                labels: ['Kitchen (Sub 1)', 'Laundry (Sub 2)', 'HVAC / Heating (Sub 3)', 'Baseline Load'],
                 datasets: [{
                     data: [
                         breakdown.kitchen_pct,
@@ -213,13 +193,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         breakdown.base_pct
                     ],
                     backgroundColor: [
-                        '#38bdf8', // Blue
-                        '#a855f7', // Purple
-                        '#f59e0b', // Amber
-                        '#10b981'  // Green
+                        '#2563eb', // Blue
+                        '#7c3aed', // Purple
+                        '#d97706', // Amber
+                        '#059669'  // Emerald
                     ],
-                    borderColor: '#0f172a',
-                    borderWidth: 3,
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
                     hoverOffset: 6
                 }]
             };
@@ -239,17 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             legend: {
                                 position: 'right',
                                 labels: {
-                                    color: '#94a3b8',
+                                    color: '#475569',
                                     font: { family: 'Inter', size: 11 },
                                     boxWidth: 12,
                                     padding: 10
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        return ` ${context.label}: ${context.raw}%`;
-                                    }
                                 }
                             }
                         }
@@ -258,23 +231,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // B. Line Chart (24-Hour Load Curve)
         const lineCtx = document.getElementById('dailyLoadLineChart');
         if (lineCtx) {
             const hoursLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
             const lineData = {
                 labels: hoursLabels,
                 datasets: [{
-                    label: 'Simulated Load (kW)',
+                    label: 'Simulated Demand (kW)',
                     data: simulated24h,
                     fill: true,
-                    backgroundColor: 'rgba(0, 242, 254, 0.1)',
-                    borderColor: '#00f2fe',
+                    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                    borderColor: '#2563eb',
                     borderWidth: 2,
-                    tension: 0.4,
+                    tension: 0.35,
                     pointRadius: 2,
                     pointHoverRadius: 5,
-                    pointBackgroundColor: '#00f2fe'
+                    pointBackgroundColor: '#2563eb'
                 }]
             };
 
@@ -290,11 +262,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         maintainAspectRatio: false,
                         scales: {
                             x: {
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                grid: { color: '#f1f5f9' },
                                 ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 }, maxTicksLimit: 8 }
                             },
                             y: {
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                grid: { color: '#f1f5f9' },
                                 ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } },
                                 suggestedMin: 0,
                                 suggestedMax: 5
@@ -309,14 +281,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 6. Update UI with Prediction Analytics
+    // 5. Update UI Analytics
     function updateAnalyticsUI(data) {
         if (!data) return;
 
-        // Animate Gauge
         animateGaugeTo(data.predicted_kw);
 
-        // Update Tier Badge
         if (tierBadge && tierLabel) {
             tierBadge.className = `tier-pill ${data.tier_class}`;
             tierBadge.innerHTML = `<i class="fa-solid ${data.tier_icon}"></i> <span>${data.tier}</span>`;
@@ -325,18 +295,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tierAdviceText) tierAdviceText.textContent = data.tier_advice;
         if (recText) recText.textContent = data.tier_advice;
 
-        // Metric Readouts
         if (valCostUsd) valCostUsd.textContent = `$${data.hourly_cost_usd.toFixed(3)}`;
-        if (valCostInr) valCostInr.textContent = `(₹${data.hourly_cost_inr}/hr)`;
+        if (valCostInr) valCostInr.textContent = `(INR ${data.hourly_cost_inr}/hr)`;
         if (valMonthKwh) valMonthKwh.textContent = `${data.monthly_estimate_kwh} kWh`;
         if (valMonthCost) valMonthCost.textContent = `(~$${data.monthly_cost_usd} / mo)`;
         if (valCarbon) valCarbon.textContent = `${data.carbon_kg_hr} kg`;
 
-        // Update Charts
         initCharts(data.breakdown, data.simulated_24h);
     }
 
-    // 7. AJAX Inference Trigger
+    // 6. AJAX Inference
     async function triggerPrediction() {
         if (!predictionForm) return;
 
@@ -346,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
             payload[key] = value;
         });
 
-        // UI Loading State
         const btnText = btnSubmit ? btnSubmit.querySelector('.btn-content') : null;
         const btnSpinner = btnSubmit ? btnSubmit.querySelector('.btn-spinner') : null;
         if (btnText && btnSpinner) {
@@ -375,7 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Intercept form submission for smooth AJAX
     if (predictionForm) {
         predictionForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -383,11 +349,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 8. Initial Load Hydration
     if (window.INITIAL_RESULT) {
         updateAnalyticsUI(window.INITIAL_RESULT);
-    } else {
-        // Default initial trigger
+    } else if (gaugeCanvas) {
         triggerPrediction();
     }
 });
