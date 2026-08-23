@@ -17,7 +17,7 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Custom Neutral Stylesheet -->
+    <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="neutral-theme">
@@ -51,13 +51,14 @@
     <!-- Workspace Main Layout -->
     <main class="main-layout">
 
-        <!-- Top Hero Banner with Crisp White Heading -->
-        <section class="workspace-hero-banner">
-            <div>
+        <!-- Top Hero Banner with Interactive Canvas & Pure White Heading -->
+        <section class="workspace-hero-banner has-canvas">
+            <canvas id="heroWaveCanvas" class="hero-canvas-bg"></canvas>
+            <div class="relative-z">
                 <h1>Demand Predictor Workspace</h1>
                 <p>Simulate residential electrical parameters, evaluate appliance sub-metering, and forecast active power demand in real time.</p>
             </div>
-            <div class="hero-stats-strip" style="border-top: none; padding-top: 0;">
+            <div class="hero-stats-strip relative-z" style="border-top: none; padding-top: 0;">
                 <div class="stat-box">
                     <span class="stat-value">12 PCs</span>
                     <span class="stat-desc">Dimensionality</span>
@@ -78,7 +79,7 @@
             </div>
             <div class="preset-pills-row" id="presetPills">
                 {% for key, preset in presets.items() %}
-                <button type="button" class="preset-btn {% if key == 'standard_balanced' %}active{% endif %}" data-preset="{{ key }}">
+                <button type="button" class="preset-btn {% if key == 'standard_balanced' %}active{% endif %}" data-preset="{{ key }}" data-tilt>
                     <span class="preset-icon"><i class="fa-solid {{ preset.icon }}"></i></span>
                     <div class="preset-info">
                         <strong>{{ preset.name }}</strong>
@@ -312,7 +313,7 @@
                 </div>
 
                 <!-- Hero Gauge Card -->
-                <div class="gauge-hero-card">
+                <div class="gauge-hero-card" data-tilt>
                     <div class="gauge-visual-wrap">
                         <canvas id="gaugeCanvas" width="260" height="150"></canvas>
                         <div class="gauge-number-center">
@@ -342,9 +343,9 @@
                     </div>
                 </div>
 
-                <!-- 4 Key Impact Metric Tiles -->
+                <!-- 4 Key Impact Metric Tiles with 3D Tilt -->
                 <div class="metric-tiles-grid">
-                    <div class="metric-tile">
+                    <div class="metric-tile" data-tilt>
                         <div class="tile-icon icon-blue">
                             <i class="fa-solid fa-dollar-sign"></i>
                         </div>
@@ -357,7 +358,7 @@
                         </div>
                     </div>
 
-                    <div class="metric-tile">
+                    <div class="metric-tile" data-tilt>
                         <div class="tile-icon icon-emerald">
                             <i class="fa-solid fa-calendar-check"></i>
                         </div>
@@ -370,7 +371,7 @@
                         </div>
                     </div>
 
-                    <div class="metric-tile">
+                    <div class="metric-tile" data-tilt>
                         <div class="tile-icon icon-leaf">
                             <i class="fa-solid fa-leaf"></i>
                         </div>
@@ -383,7 +384,7 @@
                         </div>
                     </div>
 
-                    <div class="metric-tile">
+                    <div class="metric-tile" data-tilt>
                         <div class="tile-icon icon-amber">
                             <i class="fa-solid fa-network-wired"></i>
                         </div>
@@ -401,8 +402,7 @@
 
                 <!-- Visual Charts Section -->
                 <div class="charts-split-grid">
-                    <!-- Appliance Sub-metering Pie/Donut -->
-                    <div class="chart-card">
+                    <div class="chart-card" data-tilt>
                         <div class="chart-card-header">
                             <i class="fa-solid fa-chart-pie"></i> Appliance Load Distribution
                         </div>
@@ -411,8 +411,7 @@
                         </div>
                     </div>
 
-                    <!-- 24-Hour Simulated Demand Curve -->
-                    <div class="chart-card">
+                    <div class="chart-card" data-tilt>
                         <div class="chart-card-header">
                             <i class="fa-solid fa-chart-line"></i> Simulated 24-Hour Load Profile
                         </div>
@@ -469,7 +468,8 @@
         window.PRESETS_DATA = {{ presets|tojson }};
     </script>
     
-    <!-- Main Client Script -->
+    <!-- Main Scripts -->
+    <script src="{{ url_for('static', filename='energy-waves.js') }}"></script>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoltIQ Smart Grid — AI Energy Management & Demand Forecasting</title>
-    <meta name="description" content="AI-driven smart grid electricity demand prediction platform using PCA dimensionality reduction and linear regression models.">
+    <meta name="description" content="Interactive AI-driven smart grid electricity demand prediction platform using generative electric wave analytics and PCA dimensionality reduction.">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +14,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Custom Neutral Stylesheet -->
+    <!-- Custom Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="neutral-theme">
@@ -34,9 +34,9 @@
             
             <div class="nav-links">
                 <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#circuit-simulation" class="nav-link">Interactive Grid</a>
                 <a href="#sub-metering" class="nav-link">Sub-Metering</a>
                 <a href="#dataset-model" class="nav-link">ML Architecture</a>
-                <a href="#benefits" class="nav-link">Grid Impact</a>
                 <a href="/app" class="btn-nav-cta">
                     <span>Launch Predictor</span>
                     <i class="fa-solid fa-arrow-right"></i>
@@ -45,27 +45,29 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header class="landing-hero">
-        <div class="hero-container">
+    <!-- Hero Section with Interactive Generative Electric Wave Canvas -->
+    <header class="landing-hero has-canvas">
+        <canvas id="heroWaveCanvas" class="hero-canvas-bg"></canvas>
+
+        <div class="hero-container relative-z">
             <div class="hero-text-col">
                 <div class="pill-badge">
-                    <i class="fa-solid fa-circle-check"></i> Machine Learning &bull; PCA Feature Reduction &bull; Smart Grid
+                    <i class="fa-solid fa-wave-square"></i> Live Electric Wave Field &bull; PCA-12 Compression
                 </div>
                 <h1 class="hero-headline">
                     Intelligent Household Power Demand Forecasting for <span class="text-gradient">Modern Smart Grids</span>
                 </h1>
                 <p class="hero-lead">
-                    Accurately forecast residential electricity consumption in kilowatts (kW) through dimensionality-compressed sensor telemetry, sub-metering analysis, and real-time temporal patterns.
+                    Explore real-time electric current dynamics, forecast residential active power in kilowatts (kW) with machine learning, and optimize appliance loads across dynamic tariff periods.
                 </p>
                 <div class="hero-actions">
                     <a href="/app" class="btn-hero-primary">
                         <i class="fa-solid fa-sliders"></i>
                         <span>Open Predictor Workspace</span>
                     </a>
-                    <a href="#how-it-works" class="btn-hero-secondary">
-                        <i class="fa-solid fa-circle-info"></i>
-                        <span>System Architecture</span>
+                    <a href="#circuit-simulation" class="btn-hero-secondary">
+                        <i class="fa-solid fa-network-wired"></i>
+                        <span>Interactive Grid Demo</span>
                     </a>
                 </div>
                 
@@ -81,21 +83,22 @@
                     </div>
                     <div class="stat-separator"></div>
                     <div class="stat-box">
-                        <span class="stat-value">3 Tiers</span>
-                        <span class="stat-desc">Dynamic Tariff Balancing</span>
+                        <span class="stat-value">Real-Time</span>
+                        <span class="stat-desc">Interactive Wave Physics</span>
                     </div>
                 </div>
             </div>
 
+            <!-- Interactive Visual Telemetry Card with 3D Tilt -->
             <div class="hero-visual-col">
-                <div class="interactive-diagram-card">
+                <div class="interactive-diagram-card" data-tilt>
                     <div class="diagram-header">
                         <div class="diagram-dots">
                             <span class="dot red"></span>
                             <span class="dot yellow"></span>
                             <span class="dot green"></span>
                         </div>
-                        <span class="diagram-title"><i class="fa-solid fa-network-wired"></i> Real-Time Telemetry Flow</span>
+                        <span class="diagram-title"><i class="fa-solid fa-bolt"></i> Interactive Energy Flux</span>
                     </div>
                     <div class="diagram-body">
                         <div class="node-grid">
@@ -117,16 +120,16 @@
                         
                         <div class="diagram-card-preview">
                             <div class="preview-row">
-                                <span>Voltage Stability</span>
-                                <strong class="text-blue">234.8 V</strong>
+                                <span>Active Voltage</span>
+                                <strong class="text-blue">234.84 V</strong>
                             </div>
                             <div class="preview-row">
-                                <span>Total Current</span>
-                                <strong>18.4 A</strong>
+                                <span>Grid Current</span>
+                                <strong>18.40 A</strong>
                             </div>
                             <div class="preview-row">
-                                <span>Status</span>
-                                <span class="tag-status-nominal"><i class="fa-solid fa-circle"></i> Nominal Demand</span>
+                                <span>Sub-Metering Status</span>
+                                <span class="tag-status-nominal"><i class="fa-solid fa-circle"></i> Balanced Load</span>
                             </div>
                         </div>
                     </div>
@@ -135,17 +138,72 @@
         </div>
     </header>
 
-    <!-- Main Informational Sections -->
+    <!-- Main Content Container -->
     <main class="content-wrapper">
 
-        <!-- How It Works Section -->
-        <section id="how-it-works" class="info-section">
+        <!-- Interactive Live Circuit Simulation Section -->
+        <section id="circuit-simulation" class="info-section">
+            <div class="section-badge"><i class="fa-solid fa-plug-circle-bolt"></i> Live Energy Flow Visualizer</div>
+            <h2 class="section-heading">Interactive Household Circuit & Telemetry Map</h2>
+            <p class="section-subtext">Hover or click below to simulate electron currents flowing from the municipal grid into sub-metered appliance zones.</p>
+
+            <div class="circuit-interactive-board" data-tilt>
+                <div class="circuit-node-row">
+                    <div class="circuit-box box-substation">
+                        <i class="fa-solid fa-tower-observation"></i>
+                        <strong>Substation Grid</strong>
+                        <span class="circuit-telemetry">230V / 50Hz</span>
+                    </div>
+
+                    <div class="circuit-wire">
+                        <div class="electron-pulse speed-fast"></div>
+                    </div>
+
+                    <div class="circuit-box box-smartmeter">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <strong>Smart Meter IoT</strong>
+                        <span class="circuit-telemetry">Telemetry Hub</span>
+                    </div>
+
+                    <div class="circuit-wire">
+                        <div class="electron-pulse speed-med"></div>
+                    </div>
+
+                    <div class="circuit-branch-col">
+                        <div class="circuit-appliance-item">
+                            <i class="fa-solid fa-utensils"></i>
+                            <div>
+                                <strong>Kitchen (Sub 1)</strong>
+                                <small>Oven, Dishwasher</small>
+                            </div>
+                        </div>
+                        <div class="circuit-appliance-item">
+                            <i class="fa-solid fa-shirt"></i>
+                            <div>
+                                <strong>Laundry (Sub 2)</strong>
+                                <small>Washer, Dryer</small>
+                            </div>
+                        </div>
+                        <div class="circuit-appliance-item">
+                            <i class="fa-solid fa-temperature-arrow-up"></i>
+                            <div>
+                                <strong>HVAC / Heating (Sub 3)</strong>
+                                <small>Boiler, Air Conditioner</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pipeline Methodology -->
+        <section id="how-it-works" class="info-section bg-surface-contrast">
             <div class="section-badge"><i class="fa-solid fa-gears"></i> Methodology</div>
             <h2 class="section-heading">How the Demand Prediction Pipeline Operates</h2>
             <p class="section-subtext">A systematic four-stage engineering pipeline transforms raw smart meter sensor readings into actionable grid balancing predictions.</p>
 
             <div class="pipeline-cards-grid">
-                <div class="pipeline-card">
+                <div class="pipeline-card" data-tilt>
                     <div class="step-badge">Stage 01</div>
                     <div class="card-icon-wrap icon-blue">
                         <i class="fa-solid fa-satellite-dish"></i>
@@ -154,7 +212,7 @@
                     <p>Captures 15 simultaneous inputs including active/reactive voltages, aggregate line currents, kitchen/laundry sub-metering, and rolling 24-hour baseline averages.</p>
                 </div>
 
-                <div class="pipeline-card">
+                <div class="pipeline-card" data-tilt>
                     <div class="step-badge">Stage 02</div>
                     <div class="card-icon-wrap icon-purple">
                         <i class="fa-solid fa-compress"></i>
@@ -163,7 +221,7 @@
                     <p>Applies Principal Component Analysis (PCA) to compress correlated electrical features into 12 orthogonal components, preserving over 95% of total data variance while preventing multicollinearity.</p>
                 </div>
 
-                <div class="pipeline-card">
+                <div class="pipeline-card" data-tilt>
                     <div class="step-badge">Stage 03</div>
                     <div class="card-icon-wrap icon-emerald">
                         <i class="fa-solid fa-brain"></i>
@@ -172,7 +230,7 @@
                     <p>High-throughput linear regression fits the transformed orthogonal vectors to project continuous household active power requirements in kilowatts (kW).</p>
                 </div>
 
-                <div class="pipeline-card">
+                <div class="pipeline-card" data-tilt>
                     <div class="step-badge">Stage 04</div>
                     <div class="card-icon-wrap icon-amber">
                         <i class="fa-solid fa-chart-pie"></i>
@@ -184,13 +242,13 @@
         </section>
 
         <!-- Sub-Metering Section -->
-        <section id="sub-metering" class="info-section bg-surface-contrast">
+        <section id="sub-metering" class="info-section">
             <div class="section-badge"><i class="fa-solid fa-cubes"></i> Appliance Telemetry</div>
             <h2 class="section-heading">Understanding Sub-Metering Decomposition</h2>
             <p class="section-subtext">The system partitions electrical usage across dedicated residential zones to isolate high-drain equipment.</p>
 
             <div class="submeter-grid">
-                <div class="submeter-card">
+                <div class="submeter-card" data-tilt>
                     <div class="submeter-header">
                         <div class="submeter-icon-box">
                             <i class="fa-solid fa-utensils"></i>
@@ -207,7 +265,7 @@
                     </ul>
                 </div>
 
-                <div class="submeter-card">
+                <div class="submeter-card" data-tilt>
                     <div class="submeter-header">
                         <div class="submeter-icon-box">
                             <i class="fa-solid fa-shirt"></i>
@@ -224,7 +282,7 @@
                     </ul>
                 </div>
 
-                <div class="submeter-card">
+                <div class="submeter-card" data-tilt>
                     <div class="submeter-header">
                         <div class="submeter-icon-box">
                             <i class="fa-solid fa-temperature-arrow-up"></i>
@@ -244,13 +302,13 @@
         </section>
 
         <!-- Dataset & ML Architecture Section -->
-        <section id="dataset-model" class="info-section">
+        <section id="dataset-model" class="info-section bg-surface-contrast">
             <div class="section-badge"><i class="fa-solid fa-database"></i> Data & Validation</div>
             <h2 class="section-heading">Dataset & Machine Learning Architecture</h2>
             <p class="section-subtext">Trained on real-world residential smart meter telemetry with rigorous preprocessing and dimensionality reduction.</p>
 
             <div class="model-details-grid">
-                <div class="model-info-card">
+                <div class="model-info-card" data-tilt>
                     <h3>Dataset Specifications</h3>
                     <table class="specs-table">
                         <tr>
@@ -276,7 +334,7 @@
                     </table>
                 </div>
 
-                <div class="model-info-card">
+                <div class="model-info-card" data-tilt>
                     <h3>Preprocessing Pipeline</h3>
                     <div class="pipeline-list">
                         <div class="pipeline-item">
@@ -301,39 +359,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Grid Benefits Section -->
-        <section id="benefits" class="info-section bg-surface-contrast">
-            <div class="section-badge"><i class="fa-solid fa-shield-halved"></i> Impact</div>
-            <h2 class="section-heading">Benefits for Utilities & Modern Smart Grids</h2>
-            <p class="section-subtext">How predictive intelligence translates into grid reliability and consumer cost savings.</p>
-
-            <div class="benefits-grid">
-                <div class="benefit-card">
-                    <div class="benefit-icon"><i class="fa-solid fa-chart-line-down"></i></div>
-                    <h4>Peak Shaving & Load Balancing</h4>
-                    <p>Enables utility operators to predict residential spikes and activate demand-response incentives before substation transformers experience overloads.</p>
-                </div>
-
-                <div class="benefit-card">
-                    <div class="benefit-icon"><i class="fa-solid fa-coins"></i></div>
-                    <h4>Dynamic Tariff Optimization</h4>
-                    <p>Helps consumers schedule heavy appliance cycles (washing, water heating) during cheaper off-peak windows, reducing monthly bills by up to 25%.</p>
-                </div>
-
-                <div class="benefit-card">
-                    <div class="benefit-icon"><i class="fa-solid fa-leaf"></i></div>
-                    <h4>Carbon Emission Tracking</h4>
-                    <p>Quantifies real-time carbon intensity per kilowatt-hour, encouraging green energy conservation and carbon footprint mitigation.</p>
-                </div>
-
-                <div class="benefit-card">
-                    <div class="benefit-icon"><i class="fa-solid fa-microchip"></i></div>
-                    <h4>Edge Hardware Readiness</h4>
-                    <p>Lightweight model architecture allows execution directly on local IoT smart meters without heavy cloud infrastructure requirements.</p>
                 </div>
             </div>
         </section>
@@ -368,5 +393,7 @@
         </div>
     </footer>
 
+    <!-- Interactive Generative Wave Engine -->
+    <script src="{{ url_for('static', filename='energy-waves.js') }}"></script>
 </body>
 </html>
