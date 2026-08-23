@@ -68,24 +68,20 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Header Section
-col_head_left, col_head_right = st.columns([3, 1])
-
-with col_head_left:
-    st.markdown('<span class="badge-status">System Online &bull; PCA-12 Dimensionality Reduction</span>', unsafe_allow_html=True)
-    st.markdown('<h1 style="color: #0f172a; margin-top: -5px;">VoltIQ Smart Grid Energy Management</h1>', unsafe_allow_html=True)
-    st.caption("AI-driven residential electricity demand forecasting, sub-metering breakdown, and grid balancing platform.")
-
-with col_head_right:
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    st.markdown(f"""
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; text-align: right;">
-        <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">GRID SYNCHRONIZATION</span><br>
-        <span style="font-family: 'JetBrains Mono'; font-size: 0.95rem; font-weight: 700; color: #0f172a;">{now_str}</span>
+# Header Banner Section with Crisp White Heading
+st.markdown(f"""
+<div style="background: linear-gradient(135deg, #090d16 0%, #0f172a 60%, #1e293b 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 22px 28px; margin-bottom: 20px; color: #ffffff; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
+    <div>
+        <span class="badge-status">System Online &bull; PCA-12 Dimensionality Reduction</span>
+        <h1 style="color: #ffffff !important; margin: 6px 0 2px 0; font-size: 2.1rem; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif;">VoltIQ Smart Grid Energy Management</h1>
+        <p style="color: #cbd5e1; font-size: 0.9rem; margin: 0;">AI-driven residential electricity demand forecasting, sub-metering breakdown, and grid balancing platform.</p>
     </div>
-    """, unsafe_allow_html=True)
-
-st.divider()
+    <div style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 10px 16px; text-align: right;">
+        <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">GRID TIME</span><br>
+        <span style="font-family: 'JetBrains Mono'; font-size: 0.95rem; font-weight: 700; color: #ffffff;">{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Sidebar: Presets & Controls
 with st.sidebar:
